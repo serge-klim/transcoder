@@ -1,8 +1,12 @@
 ﻿find_package(Boost COMPONENTS unit_test_framework REQUIRED )
 
 add_executable (transcoder_test
+		traits_test.cpp
 		transcoder_test.cpp
-		dummy.hpp
+        sbe_test.cpp
+        cme_eg.hpp
+		dummy.hpp   
+		sbe.hpp
 )
 
 

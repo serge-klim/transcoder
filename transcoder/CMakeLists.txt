@@ -17,6 +17,8 @@ target_sources(transcoder PUBLIC FILE_SET HEADERS
 				detail/decoder.hpp
 				detail/vdecoder.hpp
 				detail/options.hpp
+                detail/utils/sizeof.hpp
+				detail/utils/utils.hpp
 #				detail/type_selector.hpp
 				error.hpp
 				traits.hpp
@@ -31,7 +33,7 @@ target_sources(transcoder PUBLIC FILE_SET HEADERS
 
 target_include_directories(transcoder INTERFACE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
-		$<INSTALL_INTERFACE:include/transcoder>
+		$<INSTALL_INTERFACE:include>
 		)
           
 

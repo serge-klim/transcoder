@@ -26,6 +26,18 @@ struct tc::type_id<dummy::nested_type> {
    constexpr char operator()() const noexcept { return dummy::nested_type{}.type; }
 };
 
+//template <typename Options>
+//struct tc::encoded_sizeof<dummy::var_size, Options, std::true_type> : encoded_sizeof<char, Options> {};
+
+template <typename Options>
+struct tc::encoder<dummy::var_size, Options, std::true_type> {
+   byte_t* operator()(dummy::var_size const&, byte_t* begin, byte_t* end) noexcept {
+      ++begin;
+      return begin;
+   }
+};
+
+
 BOOST_AUTO_TEST_SUITE(transcoder_test_sute)
 
 BOOST_AUTO_TEST_CASE(static_test) {
@@ -403,5 +415,12 @@ BOOST_AUTO_TEST_CASE(few_types_test) {
    BOOST_CHECK_EQUAL(in2.d6, out2.d6);
    BOOST_CHECK_EQUAL(begin, res.data() + res.size());
 }
+
+//BOOST_AUTO_TEST_CASE(var_size_test) {
+//   auto in = dummy::var_size{"name", {{"1", std::chrono::system_clock::now()}, {"2", std::chrono::system_clock::now()}}};
+//   auto res = tc::encode(in);
+//   auto begin = res.data();
+//   auto out = tc::decode<dummy::var_size>(begin, begin+res.size());
+//}
 
 BOOST_AUTO_TEST_SUITE_END()

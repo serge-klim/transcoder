@@ -16,10 +16,9 @@ namespace wrapped {
 template<typename Options, typename T>
 byte_t* encode(T const& value, byte_t* begin, byte_t* end) { return encoder<T, Options>{}(value, begin, end); }
 
-template<typename Options, typename T>
+template <typename Options, typename T, typename Sizeof = encoded_sizeof<T, Options>>
 [[nodiscard]] std::vector<byte_t> encode(T const& value) {
-	constexpr auto encoded_size = encoded_sizeof<T, Options>::value;
-	auto buffer = std::vector<byte_t>(encoded_size);
+    auto buffer = std::vector<byte_t>(Sizeof::value);
 	auto begin = buffer.data();
 	encode<Options,T>(value, begin, begin + buffer.size());
 	return buffer;
@@ -48,7 +47,7 @@ void decode(byte_t const *&begin, byte_t const *end, Handler&& handler) {
 	decoder<T, Options>{}(begin, end, std::forward<Handler>(handler));
 }
 
-}
+} // namespace wrapped
 
 template<typename ...Options, typename ...T>
 byte_t* encode(byte_t* begin, byte_t* end, T const& ...value) {
@@ -63,18 +62,21 @@ template<typename ...Options, typename ...T>
 [[nodiscard]] std::vector<byte_t> encode(T const& ...value) { 
 	using type_list = boost::mp11::mp_list<T...>;
 	using option_list = boost::mp11::mp_list<effective_options<T, Options...>... >;
-	using sizeofs = boost::mp11::mp_transform<encoded_sizeof, type_list, option_list>;
-	if constexpr (boost::mp11::mp_valid<detail::encoded_sequence_sizeof, sizeofs>::value) {
-		constexpr auto encoded_size = detail::encoded_sequence_sizeof<sizeofs>::value;
-		auto res = std::vector<byte_t>(encoded_size);
-		auto begin = res.data();
-		begin = encode<Options...>(begin, begin + res.size(), value...);
-		assert(begin == res.data() + res.size());
-		return res;
+    using sizeofs = utils::encoded_sequence_sizeof<type_list, option_list>;
+    using encoded_size = utils::reduce_sizeof_sequence<sizeofs>;
+    static_assert(!std::is_same_v<encoded_size, not_encodable>, "can't encode sequence, consider implementing tc::encoder/tc::encoded_sz for all specified types");
+    auto size = std::size_t{0};
+    if constexpr (std::is_same_v<encoded_size, dynamic_size>) {
+	   //encoded_sizeof_implementation_is_missing_for<...>... but seems has encoder, therefore probably can be encoded to preallocated buffer 
+       size = (... + utils::encoded_sizeof_adapter<T, effective_options<T, Options...>>{}(value));
 	} else {
-		static_assert(false, "not yet implemented");
-		return {};
+       size = encoded_size::value;
 	}
+    auto res = std::vector<byte_t>(size);
+    auto begin = res.data();
+    begin = encode<Options...>(begin, begin + res.size(), value...);
+    assert(begin == res.data() + res.size());
+    return res;
 }
 
 template<typename T, typename ...Options> 
@@ -89,6 +91,4 @@ void decode(Iterator& begin, Iterator end, Handler &&handler) { wrapped::decode<
 template <typename T, typename Handler, typename... Options>
 void decode(byte_t const *&begin, byte_t const *end, Handler &&handler) { wrapped::decode<T, effective_options<T, Options...>>(begin, end, std::forward<Handler>(handler)); }
 
-} }
-
-
+}} // namespace tc::v1

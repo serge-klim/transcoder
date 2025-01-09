@@ -1,7 +1,7 @@
 #pragma once
-#include <detail/sint.hpp>
 #include "flyweight.hpp"
 #include "type_name.hpp"
+#include "detail/sint.hpp"
 #include <boost/mp11/algorithm.hpp>
 #include <boost/describe.hpp>
 #include <array>

@@ -2,8 +2,10 @@
 #include "transcoder/byte_order.hpp"
 #include "transcoder/options.hpp"
 #include <boost/describe.hpp>
+#include <chrono>
 #include <variant>
 #include <array>
+
 
 namespace simple {
 
@@ -59,6 +61,16 @@ struct nested_type {
    arrays_type at;
 };
 
+struct name_time {
+   std::string name;
+   std::chrono::system_clock::time_point nasdaq_time;
+};
+
+struct var_size {
+   std::string text;
+   std::vector<name_time> vals;
+};
+
 using messages = std::variant<arrays_type, type1, nested_type>;
 
 tc::options<tc::flag::big_endian> protocol_options(...);
@@ -99,5 +111,15 @@ BOOST_DESCRIBE_STRUCT(nested_type, (),
                           simple,
                           lla,
                           at))
+
+BOOST_DESCRIBE_STRUCT(name_time, (),
+                      (
+                          name,
+                          nasdaq_time))
+
+BOOST_DESCRIBE_STRUCT(var_size, (),
+                      (
+                          text,
+                          vals))
 
 }} // namespace dummy::v1
