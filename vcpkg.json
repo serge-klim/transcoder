@@ -1,0 +1,9 @@
+{
+  "dependencies": [
+    "boost-describe",
+    "boost-mp11",
+    "boost-endian",
+    "boost-type-index",
+    "boost-test"
+  ]
+}

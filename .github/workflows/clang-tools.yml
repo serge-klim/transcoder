@@ -62,7 +62,6 @@ jobs:
         -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }}
         -DCMAKE_TOOLCHAIN_FILE="${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}/scripts/buildsystems/vcpkg.cmake"
         -DVCPKG_TARGET_TRIPLET=${{ matrix.vcpkg_triplet}}
-        -DHDF5_LINK_STATICALLY=ON
         -DCMAKE_CXX_FLAGS="-fprofile-instr-generate -fcoverage-mapping -fprofile-instr-generate" 
         -S ${{ github.workspace }}
 
@@ -78,9 +77,9 @@ jobs:
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: |
-        ${{ steps.strings.outputs.build-output-dir }}/test/unit_test
+        ${{ steps.strings.outputs.build-output-dir }}/test/transcoder_test
         llvm-profdata merge -sparse default.profraw -o transcoder.profdata
-        llvm-cov show ${{ steps.strings.outputs.build-output-dir }}/test/unit_test -instr-profile=transcoder.profdata > coverage.txt
+        llvm-cov show ${{ steps.strings.outputs.build-output-dir }}/test/transcoder_test -instr-profile=transcoder.profdata > coverage.txt
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5

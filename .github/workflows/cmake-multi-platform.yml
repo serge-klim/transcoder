@@ -85,7 +85,6 @@ jobs:
         -DCMAKE_CXX_STANDARD=${{ matrix.cxx_standard }}
         -DCMAKE_TOOLCHAIN_FILE="${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}/scripts/buildsystems/vcpkg.cmake"
         -DVCPKG_TARGET_TRIPLET=${{ matrix.vcpkg_triplet}}
-        -DHDF5_LINK_STATICALLY=ON
         -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded 
         -S ${{ github.workspace }}
 
