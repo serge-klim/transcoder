@@ -1,5 +1,5 @@
 #pragma once
-#include "traits.hpp"
+#include "transcoder/traits.hpp"
 #include <boost/mp11/algorithm.hpp>
 #include <boost/mp11/bind.hpp>
 #include <type_traits>

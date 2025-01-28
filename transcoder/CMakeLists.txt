@@ -35,7 +35,6 @@ target_include_directories(transcoder INTERFACE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
 		$<INSTALL_INTERFACE:include>
 		)
-          
 
 target_link_libraries(transcoder INTERFACE Boost::boost)
 
@@ -44,7 +43,7 @@ include(CMakePackageConfigHelpers)
 
 configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/config.cmake.in
 							${CMAKE_CURRENT_BINARY_DIR}/transcoder-config.cmake
-							INSTALL_DESTINATION lib/cmake/transcoder
+							INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/transcoder
 							NO_SET_AND_CHECK_MACRO
 )
 
@@ -59,7 +58,7 @@ install(TARGETS transcoder
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        FILE_SET HEADERS DESTINATION include/transcoder
+        FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/transcoder
 )
 
 install(FILES 
@@ -68,6 +67,7 @@ install(FILES
 		DESTINATION 
 		    ${CMAKE_INSTALL_DATADIR}/transcoder
 )
+
 install(EXPORT transcoder-targets
 		FILE transcoder-targets.cmake
 		NAMESPACE fb::

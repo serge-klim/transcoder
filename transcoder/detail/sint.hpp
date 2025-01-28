@@ -1,8 +1,12 @@
 #pragma once
 #include <type_traits>
 #include <cstdint>
+//#include <boost/integer.hpp>
 
 namespace tc { inline namespace v1 { namespace detail {
+
+//template <typename T>
+//using simplified_integer_type = typename boost::int_t<sizeof(T)/sizeof(std::uint8_t)*8>::exact; 
 
 template<typename T,typename Enable = std::true_type>
 struct simplified_integer_type;

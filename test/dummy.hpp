@@ -4,6 +4,7 @@
 #include <boost/describe.hpp>
 #include <chrono>
 #include <variant>
+#include <vector>
 #include <array>
 
 
@@ -17,7 +18,8 @@ BOOST_DESCRIBE_STRUCT(type1, (),
                       (
                           i1))
 
-tc::options<tc::flag::native_endian> protocol_options(...);
+struct proto_tag;
+tc::options<tc::flag::native_endian, proto_tag> protocol_options(...);
 
 } // namespace simple
 
@@ -72,8 +74,8 @@ struct var_size {
 };
 
 using messages = std::variant<arrays_type, type1, nested_type>;
-
-tc::options<tc::flag::big_endian> protocol_options(...);
+struct proto_tag;
+tc::options<tc::flag::big_endian, proto_tag> protocol_options(...);
 
 BOOST_DESCRIBE_STRUCT(type1, (),
                       (
