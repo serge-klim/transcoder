@@ -26,8 +26,8 @@ struct tc::type_id<dummy::nested_type> {
    constexpr char operator()() const noexcept { return dummy::nested_type{}.type; }
 };
 
-//template <typename Options>
-//struct tc::encoded_sizeof<dummy::var_size, Options, std::true_type> : encoded_sizeof<char, Options> {};
+// template <typename Options>
+// struct tc::encoded_sizeof<dummy::var_size, Options, std::true_type> : encoded_sizeof<char, Options> {};
 
 template <typename Options>
 struct tc::encoder<dummy::var_size, Options, std::true_type> {
@@ -36,7 +36,6 @@ struct tc::encoder<dummy::var_size, Options, std::true_type> {
       return begin;
    }
 };
-
 
 BOOST_AUTO_TEST_SUITE(transcoder_test_sute)
 
@@ -368,6 +367,25 @@ BOOST_AUTO_TEST_CASE(flyweigt_dummy_nested_type_encode_decode_test) {
    BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(in.at.da5), cend(in.at.da5), cbegin(value.at.da5), cend(value.at.da5));
    BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(in.at.da6), cend(in.at.da6), cbegin(value.at.da6), cend(value.at.da6));
    BOOST_CHECK_EQUAL(begin, res.data() + res.size());
+
+   {
+      auto [simple, lla, at] = tc::get<&dummy::nested_type::simple, &dummy::nested_type::lla, &dummy::nested_type::at>(out);
+      BOOST_CHECK_EQUAL(in.simple.s1, simple.s1);
+      BOOST_CHECK_EQUAL(in.simple.ll2, simple.ll2);
+      BOOST_CHECK_EQUAL(in.simple.i3, simple.i3);
+      BOOST_CHECK_EQUAL(in.simple.f4, simple.f4);
+      BOOST_CHECK_EQUAL(in.simple.d5, simple.d5);
+      BOOST_CHECK_EQUAL(in.simple.d6, simple.d6);
+
+      BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(in.lla), cend(in.lla), cbegin(lla), cend(lla));
+
+      BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(in.at.sa1), cend(in.at.sa1), cbegin(at.sa1), cend(at.sa1));
+      BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(in.at.lla2), cend(in.at.lla2), cbegin(at.lla2), cend(at.lla2));
+      BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(in.at.ia3), cend(in.at.ia3), cbegin(at.ia3), cend(at.ia3));
+      BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(in.at.fa4), cend(in.at.fa4), cbegin(at.fa4), cend(at.fa4));
+      BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(in.at.da5), cend(in.at.da5), cbegin(at.da5), cend(at.da5));
+      BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(in.at.da6), cend(in.at.da6), cbegin(at.da6), cend(at.da6));
+   }
 }
 
 BOOST_AUTO_TEST_CASE(dummy_type1_encode_decode_as_flyweight_tuple_test) {
@@ -416,11 +434,11 @@ BOOST_AUTO_TEST_CASE(few_types_test) {
    BOOST_CHECK_EQUAL(begin, res.data() + res.size());
 }
 
-//BOOST_AUTO_TEST_CASE(var_size_test) {
-//   auto in = dummy::var_size{"name", {{"1", std::chrono::system_clock::now()}, {"2", std::chrono::system_clock::now()}}};
-//   auto res = tc::encode(in);
-//   auto begin = res.data();
-//   auto out = tc::decode<dummy::var_size>(begin, begin+res.size());
-//}
+// BOOST_AUTO_TEST_CASE(var_size_test) {
+//    auto in = dummy::var_size{"name", {{"1", std::chrono::system_clock::now()}, {"2", std::chrono::system_clock::now()}}};
+//    auto res = tc::encode(in);
+//    auto begin = res.data();
+//    auto out = tc::decode<dummy::var_size>(begin, begin+res.size());
+// }
 
 BOOST_AUTO_TEST_SUITE_END()

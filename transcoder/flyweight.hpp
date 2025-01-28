@@ -6,6 +6,7 @@
 #include <variant>
 #include <iterator>
 #include <type_traits>
+#include <tuple>
 #include <cassert>
 
 namespace tc { inline namespace v1 {
@@ -30,13 +31,18 @@ private:
 
 template<auto P, typename T, typename Options>
 auto get(flyweight<T, Options> const& fw) {
-	if (std::is_member_object_pointer_v<decltype(P)>) {
+	if constexpr (std::is_member_object_pointer_v<decltype(P)>) {
 		static constexpr auto offset = tc::describe::encoded_member_offset<P, Options>::type::value;
 		auto data = fw.data() + offset;
 		return tc::member_decoder<P, Options>{}(data, data - offset + encoded_sizeof<T, Options>{}());
 	} else {
 		static_assert(std::is_same_v<T, T>, "only implemented for pointers now");
 	}
+}
+
+template <auto... P, typename T, typename Options, typename Enable = std::enable_if_t<(sizeof...(P) > 1), void>>
+auto get(flyweight<T, Options> const& fw) {
+   return std::make_tuple(get<P,T, Options>(fw)...);
 }
 
 
