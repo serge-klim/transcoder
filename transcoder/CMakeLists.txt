@@ -2,7 +2,7 @@
 
 add_library (transcoder INTERFACE)
 
-add_library (fb::transcoder ALIAS transcoder)
+add_library (transcoder::transcoder ALIAS transcoder)
 
 target_sources(transcoder PUBLIC FILE_SET HEADERS
 				FILES
@@ -19,6 +19,8 @@ target_sources(transcoder PUBLIC FILE_SET HEADERS
 				detail/options.hpp
                 detail/utils/sizeof.hpp
 				detail/utils/utils.hpp
+				detail/tagged_t.hpp
+				detail/tagged_t_17.hpp
 #				detail/type_selector.hpp
 				error.hpp
 				traits.hpp
@@ -28,6 +30,7 @@ target_sources(transcoder PUBLIC FILE_SET HEADERS
 				type_name.hpp
                 transcoder.hpp
 				flyweight.hpp
+				tagged_t.hpp
 				io.hpp
 			   )
 
@@ -70,6 +73,6 @@ install(FILES
 
 install(EXPORT transcoder-targets
 		FILE transcoder-targets.cmake
-		NAMESPACE fb::
+		NAMESPACE transcoder::
 		DESTINATION ${CMAKE_INSTALL_DATADIR}/transcoder
 )

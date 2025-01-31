@@ -11,7 +11,7 @@ add_executable (transcoder_test
 
 
 target_link_libraries(transcoder_test
-		fb::transcoder
+		transcoder::transcoder
 	    Boost::disable_autolinking
         Boost::boost
 		Boost::unit_test_framework
