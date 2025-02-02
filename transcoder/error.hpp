@@ -20,6 +20,9 @@ struct unknown_type_error : std::runtime_error {
 	unknown_type_error() : std::runtime_error("unknown type"){}
 };
 
+[[noreturn]] inline void handle_error(more_wanted const& v) { throw more_wanted_error{v.bytes}; }
+[[noreturn]] inline void handle_error(unknown_type const&) { throw unknown_type_error{}; }
+
 } }
 
 

@@ -21,12 +21,6 @@ struct decoder<std::variant<T...>, Options, std::true_type> {
 	void operator()(byte_t const*& begin, byte_t const* end, H&& handler);
 	std::variant<T...> operator()(byte_t const*& begin, byte_t const* end) /*noexcept
 		(std::conjunction_v<boost::mp11::mp_contains<type_list, unexpected>, boost::mp11::mp_contains<type_list, more_wanted>>)*/;
-private:
-	//template<typename H, typename ...D>
-	//void decode(boost::mp11::mp_list<D...>, byte_t const*& begin, byte_t const* end, H&& handler);
-
-	[[noreturn]] static void handle_error(more_wanted&& v) { throw more_wanted_error{v.bytes}; }
-	[[noreturn]] static void handle_error(unknown_type&&) { throw unknown_type_error{}; }
 };
 
 namespace detail {
