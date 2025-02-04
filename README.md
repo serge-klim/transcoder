@@ -12,7 +12,7 @@ Once data is represented as a tuple or has [Boost.describe](https://www.boost.or
 ```
 auto encoded_buffer = tc::encode(message);
 auto begin = encoded_buffer.data();
-auto decoded_message = _tc::decode<Message>(begin, begin+encoded_buffer.size());
+auto decoded_message = tc::decode<Message>(begin, begin+encoded_buffer.size());
 ```
 here for example, implementation of [Nasdaq TotalView-ITCH 5.0](https://www.nasdaqtrader.com/content/technicalsupport/specifications/dataproducts/NQTVITCHSpecification.pdf) protocol using this library.
 
