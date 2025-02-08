@@ -51,16 +51,19 @@ void tc::v1::decoder<std::variant<T...>, Options, std::true_type>::operator()(by
 
 	using id_type = typename detail::simplified_integer_type<decltype(type_id<boost::mp11::mp_front<type_list>>{}()) > ::type;
 	auto size = std::distance(begin, end);
-	if (static_cast<std::size_t>(size) < sizeof(id_type))
+	if (static_cast<std::size_t>(size) < sizeof(id_type)){
 		std::forward<H>(handler)(more_wanted{ sizeof(id_type) });
+        return;
+    }
 	static constexpr id_type ids[] = { type_id<T>{}()..., };
 	static constexpr auto ids_end = ids + std::ssize(ids);
 	id_type type;
 	std::memcpy(&type, begin, sizeof(type));
-	if(auto i = std::find(ids, ids_end, type); i!=ids_end)
+	if(auto i = std::find(ids, ids_end, type); i!=ids_end) {
 		(*dispatchers[std::distance(ids,i)])(begin, end, std::forward<H>(handler));
-	else
-		std::forward<H>(handler)(unknown_type{});
+        return;
+    }
+	std::forward<H>(handler)(unknown_type{});
 	//static const auto selector = type_selector<T...>{};
 	//typename type_selector<T...>::value_t type;
 	//std::memcpy(&type, begin, sizeof(type));

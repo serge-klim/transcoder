@@ -24,29 +24,29 @@ template <typename Options, typename T, typename Sizeof = encoded_sizeof<T, Opti
 	return buffer;
 }
 
+template <typename T, typename Options>
+[[nodiscard]] T decode(byte_t const*& begin, byte_t const* end) { return decoder<T, Options>{}(begin, end); }
+
 template<typename T, typename Options>
 [[nodiscard]] T decode(byte_t*& begin, byte_t const* end) {
 	byte_t const* b = begin;
-	auto res = decoder<T, Options>{}(b, end);
+	auto res = decode<T, Options>(b, end);
 	begin += b - begin;
 	return res;
 }
 
-template<typename T, typename Options>
-[[nodiscard]] T decode(byte_t const*& begin, byte_t const* end) { return decoder<T, Options>{}(begin, end); }
-
-template <typename T, typename Options, typename Handler>
-void decode(byte_t *&begin, byte_t const *end, Handler &&handler) {
-	byte_t const* b = begin;
-	decoder<T, Options>{}(b, end, std::forward<Handler>(handler));
-	begin += b - begin;
-}
 
 template <typename T, typename Options, typename Handler>
 void decode(byte_t const *&begin, byte_t const *end, Handler&& handler) { 
 	decoder<T, Options>{}(begin, end, std::forward<Handler>(handler));
 }
 
+template <typename T, typename Options, typename Handler>
+void decode(byte_t*& begin, byte_t const* end, Handler&& handler) {
+   byte_t const* b = begin;
+   decode<T, Options>(b, end, std::forward<Handler>(handler));
+   begin += b - begin;
+}
 } // namespace wrapped
 
 template<typename ...Options, typename ...T>
