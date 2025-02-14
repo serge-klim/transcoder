@@ -2,6 +2,7 @@
 #include <string>
 #include <stdexcept>
 #include <cstddef>
+#include <type_traits>
 
 namespace tc { inline namespace v1 {
 
@@ -19,9 +20,9 @@ private:
 struct unknown_type_error : std::runtime_error {
 	unknown_type_error() : std::runtime_error("unknown type"){}
 };
-
-[[noreturn]] inline void handle_error(more_wanted const& v) { throw more_wanted_error{v.bytes}; }
-[[noreturn]] inline void handle_error(unknown_type const&) { throw unknown_type_error{}; }
+inline constexpr std::false_type handle_error(auto const& v) noexcept { return {}; }
+[[noreturn]] inline std::true_type handle_error(more_wanted const& v) { throw more_wanted_error{v.bytes}; }
+[[noreturn]] inline std::true_type handle_error(unknown_type const&) { throw unknown_type_error{}; }
 
 } }
 
