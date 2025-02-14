@@ -52,6 +52,10 @@ struct encoded_sizeof<flyweight<T, Options>, Options, std::true_type> : encoded_
 template<typename T, typename Options>
 struct type_id<flyweight<T, Options>> : type_id<T> {};
 
+template <typename... T, typename Options>
+struct type_id<std::variant<flyweight<T, Options>...>> : type_id<std::variant<T...>> {};
+
+
 template<typename T, typename Options>
 struct decoder<flyweight<T, Options>, Options, /*std::is_same<std::size_t, decltype(std::declval<encoded_sizeof<T>>()) >*/ std::true_type> {
 	flyweight<T, Options> operator()(byte_t const*& begin, [[maybe_unused]] byte_t const* end) noexcept {
