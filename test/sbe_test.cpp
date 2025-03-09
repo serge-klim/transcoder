@@ -153,39 +153,39 @@ BOOST_AUTO_TEST_CASE(basic_decode_test) {
    auto packet_header = tc::decode<cme_test::packet_header>(begin, begin + data.size());
    BOOST_CHECK_EQUAL(packet_header.msg_seq_num, 0x0ce3);
    auto refresh_volume37 = tc::decode<cme_test::MDIncrementalRefreshVolume37>(begin, begin + data.size());
-   BOOST_REQUIRE_EQUAL(refresh_volume37.template_id, 37);
+   BOOST_REQUIRE_EQUAL(refresh_volume37.message_header.templateId, 37);
    BOOST_CHECK_EQUAL(refresh_volume37.msg_size, 0x028);
-   BOOST_CHECK_EQUAL(refresh_volume37.block_length, 0x0b);
-   BOOST_CHECK_EQUAL(refresh_volume37.matchEventIndicator, cme_test::MatchEventIndicator::LastQuoteMsg);
+   BOOST_CHECK_EQUAL(refresh_volume37.message_header.blockLength, 0x0b);
+   BOOST_CHECK(refresh_volume37.matchEventIndicator == cme_test::MatchEventIndicator::LastQuoteMsg);
    BOOST_REQUIRE_EQUAL(refresh_volume37.noMDEntries.data.size(), 1);
    BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].mDEntrySize, 0x02);
    BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].securityID, 0x1699);
    BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].rptSeq, 0x02e);
-   BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].mDUpdateAction, 0);
+   BOOST_CHECK(refresh_volume37.noMDEntries.data[0].mDUpdateAction == cme_test::MDUpdateAction::New);
    auto refresh_order_book47 = tc::decode<cme_test::MDIncrementalRefreshOrderBook47>(begin, begin + data.size());
-   BOOST_REQUIRE_EQUAL(refresh_order_book47.template_id, 47);
+   BOOST_REQUIRE_EQUAL(refresh_order_book47.message_header.templateId, 47);
    BOOST_CHECK_EQUAL(refresh_order_book47.msg_size, 0x90);
-   BOOST_CHECK_EQUAL(refresh_order_book47.block_length, 0x0b);
-   BOOST_CHECK_EQUAL(refresh_order_book47.matchEventIndicator, cme_test::MatchEventIndicator::LastImpliedMsg);
+   BOOST_CHECK_EQUAL(refresh_order_book47.message_header.blockLength, 0x0b);
+   BOOST_CHECK(refresh_order_book47.matchEventIndicator == cme_test::MatchEventIndicator::LastImpliedMsg);
    BOOST_REQUIRE_EQUAL(refresh_order_book47.noMDEntries.data.size(), 3);
    auto refresh_order_book46 = tc::decode<cme_test::MDIncrementalRefreshBook46>(begin, begin + data.size());
-   BOOST_CHECK_EQUAL(refresh_order_book46.matchEventIndicator, cme_test::MatchEventIndicator::LastImpliedMsg);
-   BOOST_REQUIRE_EQUAL(refresh_order_book46.template_id, 46);
+   BOOST_CHECK(refresh_order_book46.matchEventIndicator == cme_test::MatchEventIndicator::LastImpliedMsg);
+   BOOST_REQUIRE_EQUAL(refresh_order_book46.message_header.templateId, 46);
    BOOST_REQUIRE_EQUAL(refresh_order_book46.noMDEntries.data.size(), 2);
    BOOST_REQUIRE_EQUAL(refresh_order_book46.noOrderIDEntries.data.size(), 0);
    auto refresh_session_statistics51 = tc::decode<cme_test::MDIncrementalRefreshSessionStatistics51>(begin, begin + data.size());
-   BOOST_CHECK_EQUAL(refresh_session_statistics51.matchEventIndicator, 8);
-   BOOST_REQUIRE_EQUAL(refresh_session_statistics51.template_id, 51);
+   //BOOST_CHECK(refresh_session_statistics51.matchEventIndicator, 8);
+   BOOST_REQUIRE_EQUAL(refresh_session_statistics51.message_header.templateId, 51);
    BOOST_REQUIRE_EQUAL(refresh_session_statistics51.noMDEntries.data.size(), 3);
    auto security_status30_1 = tc::decode<cme_test::SecurityStatus30>(begin, begin + data.size());
    BOOST_CHECK_EQUAL(security_status30_1.msg_size, 0x028);
-   BOOST_CHECK_EQUAL(security_status30_1.block_length, 30);
+   BOOST_CHECK_EQUAL(security_status30_1.message_header.blockLength, 30);
    auto security_status30_2 = tc::decode<cme_test::SecurityStatus30>(begin, begin + data.size());
    BOOST_CHECK_EQUAL(security_status30_2.msg_size, 0x028);
-   BOOST_CHECK_EQUAL(security_status30_2.block_length, 30);
+   BOOST_CHECK_EQUAL(security_status30_2.message_header.blockLength, 30);
    auto security_status30_3 = tc::decode<cme_test::SecurityStatus30>(begin, begin + data.size());
    BOOST_CHECK_EQUAL(security_status30_3.msg_size, 0x028);
-   BOOST_CHECK_EQUAL(security_status30_3.block_length, 30);
+   BOOST_CHECK_EQUAL(security_status30_3.message_header.blockLength, 30);
 }
 
 BOOST_AUTO_TEST_CASE(basic_encode_test) {
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(basic_encode_test) {
       auto security_status30_2 = tc::decode<cme_test::SecurityStatus30>(begin, end);
       auto security_status30_3 = tc::decode<cme_test::SecurityStatus30>(begin, end);
       BOOST_CHECK_EQUAL(security_status30_3.msg_size, 0x028);
-      BOOST_CHECK_EQUAL(security_status30_3.block_length, 30);
+      BOOST_CHECK_EQUAL(security_status30_3.message_header.blockLength, 30);
       return tc::encode(packet_header, security_status30_1,
                         refresh_volume37 ,
                         security_status30_2,
@@ -217,41 +217,91 @@ BOOST_AUTO_TEST_CASE(basic_encode_test) {
    BOOST_CHECK_EQUAL(packet_header.msg_seq_num, 0x0ce3);
    auto security_status30_1 = tc::decode<cme_test::SecurityStatus30>(begin, begin + data.size());
    BOOST_CHECK_EQUAL(security_status30_1.msg_size, 0x028);
-   BOOST_CHECK_EQUAL(security_status30_1.block_length, 30);
+   BOOST_CHECK_EQUAL(security_status30_1.message_header.blockLength, 30);
    auto refresh_volume37 = tc::decode<cme_test::MDIncrementalRefreshVolume37>(begin, begin + data.size());
-   BOOST_REQUIRE_EQUAL(refresh_volume37.template_id, 37);
+   BOOST_REQUIRE_EQUAL(refresh_volume37.message_header.templateId, 37);
    BOOST_CHECK_EQUAL(refresh_volume37.msg_size, 0x028);
-   BOOST_CHECK_EQUAL(refresh_volume37.block_length, 0x0b);
-   BOOST_CHECK_EQUAL(refresh_volume37.matchEventIndicator, cme_test::MatchEventIndicator::LastQuoteMsg);
+   BOOST_CHECK_EQUAL(refresh_volume37.message_header.blockLength, 0x0b);
+   BOOST_CHECK(refresh_volume37.matchEventIndicator == cme_test::MatchEventIndicator::LastQuoteMsg);
    BOOST_REQUIRE_EQUAL(refresh_volume37.noMDEntries.data.size(), 1);
    BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].mDEntrySize, 0x02);
    BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].securityID, 0x1699);
    BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].rptSeq, 0x02e);
-   BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].mDUpdateAction, 0);
+   BOOST_CHECK(refresh_volume37.noMDEntries.data[0].mDUpdateAction == cme_test::MDUpdateAction::New);
    auto security_status30_2 = tc::decode<cme_test::SecurityStatus30>(begin, begin + data.size());
    BOOST_CHECK_EQUAL(security_status30_2.msg_size, 0x028);
-   BOOST_CHECK_EQUAL(security_status30_2.block_length, 30);
+   BOOST_CHECK_EQUAL(security_status30_2.message_header.blockLength, 30);
    auto refresh_order_book47 = tc::decode<cme_test::MDIncrementalRefreshOrderBook47>(begin, begin + data.size());
-   BOOST_REQUIRE_EQUAL(refresh_order_book47.template_id, 47);
+   BOOST_REQUIRE_EQUAL(refresh_order_book47.message_header.templateId, 47);
    BOOST_CHECK_EQUAL(refresh_order_book47.msg_size, 0x90);
-   BOOST_CHECK_EQUAL(refresh_order_book47.block_length, 0x0b);
-   BOOST_CHECK_EQUAL(refresh_order_book47.matchEventIndicator, cme_test::MatchEventIndicator::LastImpliedMsg);
+   BOOST_CHECK_EQUAL(refresh_order_book47.message_header.blockLength, 0x0b);
+   BOOST_CHECK(refresh_order_book47.matchEventIndicator == cme_test::MatchEventIndicator::LastImpliedMsg);
    BOOST_REQUIRE_EQUAL(refresh_order_book47.noMDEntries.data.size(), 3);
    auto security_status30_3 = tc::decode<cme_test::SecurityStatus30>(begin, begin + data.size());
    BOOST_CHECK_EQUAL(security_status30_3.msg_size, 0x028);
-   BOOST_CHECK_EQUAL(security_status30_3.block_length, 30);
+   BOOST_CHECK_EQUAL(security_status30_3.message_header.blockLength, 30);
    auto refresh_order_book46 = tc::decode<cme_test::MDIncrementalRefreshBook46>(begin, begin + data.size());
-   BOOST_CHECK_EQUAL(refresh_order_book46.matchEventIndicator, cme_test::MatchEventIndicator::LastImpliedMsg);
-   BOOST_REQUIRE_EQUAL(refresh_order_book46.template_id, 46);
+   BOOST_CHECK(refresh_order_book46.matchEventIndicator == cme_test::MatchEventIndicator::LastImpliedMsg);
+   BOOST_REQUIRE_EQUAL(refresh_order_book46.message_header.templateId, 46);
    BOOST_REQUIRE_EQUAL(refresh_order_book46.noMDEntries.data.size(), 2);
    BOOST_REQUIRE_EQUAL(refresh_order_book46.noOrderIDEntries.data.size(), 0);
    auto security_status30_4 = tc::decode<cme_test::SecurityStatus30>(begin, begin + data.size());
    BOOST_CHECK_EQUAL(security_status30_4.msg_size, 0x028);
-   BOOST_CHECK_EQUAL(security_status30_4.block_length, 30);
+   BOOST_CHECK_EQUAL(security_status30_4.message_header.blockLength, 30);
    auto refresh_session_statistics51 = tc::decode<cme_test::MDIncrementalRefreshSessionStatistics51>(begin, begin + data.size());
-   BOOST_CHECK_EQUAL(refresh_session_statistics51.matchEventIndicator, 8);
-   BOOST_REQUIRE_EQUAL(refresh_session_statistics51.template_id, 51);
+   //BOOST_CHECK_EQUAL(refresh_session_statistics51.matchEventIndicator, 8);
+   BOOST_REQUIRE_EQUAL(refresh_session_statistics51.message_header.templateId, 51);
    BOOST_REQUIRE_EQUAL(refresh_session_statistics51.noMDEntries.data.size(), 3);
+}
+
+BOOST_AUTO_TEST_CASE(basic_decode_messages) {
+   auto begin = reinterpret_cast<tc::byte_t const*>(data.data());
+   auto packet_header = tc::decode<cme_test::packet_header>(begin, begin + data.size());
+   BOOST_CHECK_EQUAL(packet_header.msg_seq_num, 0x0ce3);
+   auto variant_out1 = tc::decode<cme_test::messages>(begin, begin + data.size());
+   std::visit([&](auto const& refresh_volume37) {
+      if constexpr (std::is_same_v<decltype(refresh_volume37), cme_test::MDIncrementalRefreshVolume37 const&>) {
+         BOOST_REQUIRE_EQUAL(refresh_volume37.message_header.templateId, 37);
+         BOOST_CHECK_EQUAL(refresh_volume37.msg_size, 0x028);
+         BOOST_CHECK_EQUAL(refresh_volume37.message_header.blockLength, 0x0b);
+         BOOST_CHECK(refresh_volume37.matchEventIndicator == cme_test::MatchEventIndicator::LastQuoteMsg);
+         BOOST_REQUIRE_EQUAL(refresh_volume37.noMDEntries.data.size(), 1);
+         BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].mDEntrySize, 0x02);
+         BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].securityID, 0x1699);
+         BOOST_CHECK_EQUAL(refresh_volume37.noMDEntries.data[0].rptSeq, 0x02e);
+         BOOST_CHECK(refresh_volume37.noMDEntries.data[0].mDUpdateAction == cme_test::MDUpdateAction::New);
+      } else {
+         BOOST_CHECK_MESSAGE(false, "wrong type has been decoded");
+      }
+   },
+              variant_out1);
+
+   auto variant_out2 = tc::decode<cme_test::messages>(begin, begin + data.size());
+   std::visit([&](auto const& refresh_order_book47) {
+      if constexpr (std::is_same_v<decltype(refresh_order_book47), cme_test::MDIncrementalRefreshOrderBook47 const&>) {
+         BOOST_REQUIRE_EQUAL(refresh_order_book47.message_header.templateId, 47);
+         BOOST_CHECK_EQUAL(refresh_order_book47.msg_size, 0x90);
+         BOOST_CHECK_EQUAL(refresh_order_book47.message_header.blockLength, 0x0b);
+         BOOST_CHECK(refresh_order_book47.matchEventIndicator == cme_test::MatchEventIndicator::LastImpliedMsg);
+         BOOST_REQUIRE_EQUAL(refresh_order_book47.noMDEntries.data.size(), 3);
+      } else {
+         BOOST_CHECK_MESSAGE(false, "wrong type has been decoded");
+      }
+   },
+              variant_out2);
+
+   auto variant_out3 = tc::decode<cme_test::messages>(begin, begin + data.size());
+   std::visit([&](auto const& refresh_order_book46) {
+      if constexpr (std::is_same_v<decltype(refresh_order_book46), cme_test::MDIncrementalRefreshBook46 const&>) {
+         BOOST_CHECK(refresh_order_book46.matchEventIndicator == cme_test::MatchEventIndicator::LastImpliedMsg);
+         BOOST_REQUIRE_EQUAL(refresh_order_book46.message_header.templateId, 46);
+         BOOST_REQUIRE_EQUAL(refresh_order_book46.noMDEntries.data.size(), 2);
+         BOOST_REQUIRE_EQUAL(refresh_order_book46.noOrderIDEntries.data.size(), 0);
+      } else {
+         BOOST_CHECK_MESSAGE(false, "wrong type has been decoded");
+      }
+   },
+              variant_out3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

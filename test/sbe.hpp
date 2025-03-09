@@ -15,6 +15,7 @@ class optional
  public:
    using value_type = T;
    static constexpr value_type null_value = Null;
+   optional() = default;
    optional(T value) : value_{std::move(value)} {}
    optional(std::optional<T> value) : value_{value ? *std::move(value) : null_value} {}
    constexpr T const& raw_value() const noexcept { return value_; }
@@ -22,7 +23,7 @@ class optional
    explicit constexpr operator bool() const noexcept { return has_value(); }
    operator std::optional<T>() const { return has_value() ? std::make_optional(value_) : std::nullopt; }
  private:
-   T value_;
+   T value_ = null_value;
 };
 
 
