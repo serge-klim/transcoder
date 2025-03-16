@@ -4,6 +4,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/describe.hpp>
 #include <numeric>
+#include <array>
 #include <type_traits>
 
 namespace cme_test {
