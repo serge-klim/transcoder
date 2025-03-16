@@ -5,6 +5,8 @@ add_executable (transcoder_test
 		transcoder_test.cpp
         sbe_test.cpp
         cme_eg.hpp
+        eobi_eg.hpp
+        eobi_test.cpp
 		dummy.hpp   
 		sbe.hpp
 )
