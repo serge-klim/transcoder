@@ -59,9 +59,12 @@ struct type_id<std::variant<flyweight<T, Options>...>> : type_id<std::variant<T.
 template<typename T, typename Options>
 struct decoder<flyweight<T, Options>, Options, /*std::is_same<std::size_t, decltype(std::declval<encoded_sizeof<T>>()) >*/ std::true_type> {
 	flyweight<T, Options> operator()(byte_t const*& begin, [[maybe_unused]] byte_t const* end) noexcept {
-		assert(static_cast<std::size_t>(std::distance(begin, end)) >= (encoded_sizeof<T, Options>{}()));
+        using encoded_size = utils::eval_sizeof_t<T, Options>; // encoded_sizeof<T, Options>{}()
+        static_assert(!std::is_same_v<encoded_size, not_encodable>, "can't encode sequence, consider implementing tc::encoder/tc::encoded_sz for all specified types");
+        static_assert(!std::is_same_v<encoded_size, dynamic_size>, "flyweight for dynamically encoded/decoded type wouldn't make much sense.");
+        assert(static_cast<std::size_t>(std::distance(begin, end)) >= encoded_size::value);
 		auto fw = begin;
-		begin += encoded_sizeof<T, Options>{}();
+        begin += encoded_size::value;
 		return { fw };
 	}
 };

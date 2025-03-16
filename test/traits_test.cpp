@@ -154,4 +154,13 @@ BOOST_AUTO_TEST_CASE(encoded_sizeof_static_test) {
    BOOST_CHECK(true);
 }
 
+BOOST_AUTO_TEST_CASE(encoded_size_static_test) {
+   static_assert(tc::encoded_sizeof<int, dummy_options>::value == tc::encoded_size<int>(), "tc::encoded_sizeof seems broken");
+   static_assert(tc::encoded_sizeof<short, dummy_options>::value == tc::encoded_size<short>(), "tc::encoded_sizeof seems broken");
+   static_assert(tc::encoded_sizeof<unsigned char, dummy_options>::value == tc::encoded_size<unsigned char>(), "tc::encoded_sizeof seems broken");
+   static_assert(tc::encoded_sizeof<dummy::type1, dummy_options>::value == tc::encoded_size<dummy::type1>());
+   BOOST_CHECK(true);
+}
+
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -28,8 +28,8 @@ struct eval_sizeof {
    using type = decltype(select_sizeof<T>(0));
 };
 
-template <typename L, typename Options>
-using eval_sizeof_t = typename eval_sizeof<L,Options>::type;
+template <typename T, typename Options>
+using eval_sizeof_t = typename eval_sizeof<T,Options>::type;
 
 template <typename L, typename Options>
 using encoded_sequence_sizeof = boost::mp11::mp_transform<eval_sizeof_t, L, Options>;
