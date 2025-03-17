@@ -414,6 +414,31 @@ BOOST_AUTO_TEST_CASE(dummy_type1_encode_decode_as_flyweight_tuple_test) {
    BOOST_CHECK_EQUAL(begin, res.data() + res.size());
 }
 
+BOOST_AUTO_TEST_CASE(decode_set_as_variant_flyweight_test) {
+   auto in = dummy::type1{'1', 1, 0xf00002, 3, 4, 5, 6006};
+   auto res = tc::encode(in);
+   BOOST_CHECK(!res.empty());
+   BOOST_CHECK_LE(res.size(), sizeof(in));
+   auto begin = res.data();
+   auto variant_out = tc::decode<tc::as_flyweight<dummy::messages>>(begin, begin + res.size());
+   std::visit([&in](auto const& out) {
+      if constexpr (std::is_same_v<decltype(out.value()), dummy::type1>) {
+         auto val = out.value();
+         BOOST_CHECK_EQUAL(in.s1, val.s1);
+         BOOST_CHECK_EQUAL(in.ll2,val.ll2);
+         BOOST_CHECK_EQUAL(in.i3, val.i3);
+         BOOST_CHECK_EQUAL(in.f4, val.f4);
+         BOOST_CHECK_EQUAL(in.d5, val.d5);
+         BOOST_CHECK_EQUAL(in.d6, val.d6);
+      } else {
+         BOOST_CHECK_MESSAGE(false, "wrong type has been decoded");
+      }
+   },
+              variant_out);
+   BOOST_CHECK_EQUAL(begin, res.data() + res.size());
+}
+
+
 BOOST_AUTO_TEST_CASE(few_types_test) {
    auto in1 = simple::type1{0xabcd};
    auto in2 = dummy::type1{'1', 1, 0xf00002, 3, 4, 5, 6006};

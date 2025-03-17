@@ -1,6 +1,7 @@
 #pragma once
 #include "traits.hpp"
 #include "detail/decoder.hpp"
+#include "detail/options.hpp"
 #include "options.hpp"
 #include <boost/mp11/algorithm.hpp>
 #include <variant>
@@ -11,7 +12,7 @@
 
 namespace tc { inline namespace v1 {
 
-template<typename T, typename Options = proto_options<T>>
+template<typename T, typename Options = effective_options<T>>
 class flyweight {
 public:
 	using type = T;

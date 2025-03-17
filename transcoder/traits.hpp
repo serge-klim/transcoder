@@ -21,7 +21,7 @@ template<typename T, typename U, U T::* P, typename Options> struct member_encod
 template<typename T, typename U, U T::* P, typename Options> struct member_decoder<P, Options> : decoder<U, Options> {};
 
 
-template<typename T> struct type_id;
+template<typename T> struct type_id{};
 
 template<typename T>
 using proto_options = decltype(protocol_options(std::declval<T>()));  // tc::options<> protocol_options(...) - has to be declared in protocol namespace
