@@ -16,7 +16,7 @@ auto decoded_message = tc::decode<Message>(begin, begin+encoded_buffer.size());
 ```
 here for example, implementation of [Nasdaq TotalView-ITCH 5.0](https://www.nasdaqtrader.com/content/technicalsupport/specifications/dataproducts/NQTVITCHSpecification.pdf) protocol using this library.
 
-described structures: https://github.com/serge-klim/md_prsr/tree/main/nasdaq/itch_v5.0
+described structures: [https://github.com/serge-klim/md_prsr/tree/main/nasdaq/itch_v5.0](https://github.com/serge-klim/md_prsr/tree/main/md_prsr/nasdaq/itch_v5.0)
 and usage example: https://github.com/serge-klim/md_prsr/blob/main/tools/nasdaq_itch_v5.0/message_dump.cpp#L19
 
 library avalible as [vcpkg](https://vcpkg.io) package transcoder via this [vcpkg registry](https://github.com/serge-klim/pkgs):
