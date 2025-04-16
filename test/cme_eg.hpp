@@ -543,6 +543,18 @@ BOOST_DESCRIBE_STRUCT(MDIncrementalRefreshSessionStatistics51::NoMDEntries, (), 
 
 using messages = std::variant<SecurityStatus30,MDIncrementalRefreshVolume37,MDIncrementalRefreshBook46,MDIncrementalRefreshOrderBook47,MDIncrementalRefreshSessionStatistics51>;
 
+struct extended_message_header {
+   std::uint16_t msg_size;
+   std::uint16_t blockLength;
+   std::uint16_t templateId;
+   std::uint16_t schemaId;
+   std::uint16_t version;
+};
+BOOST_DESCRIBE_STRUCT(extended_message_header, (),
+                      (   msg_size,
+                          blockLength,
+						  templateId))
+
 } // namespace cme_test
 
 #include "transcoder/traits.hpp"
@@ -555,13 +567,7 @@ tc::options<tc::flag::little_endian> protocol_options(...);
 
 template <>
 struct tc::type_id<cme_test::messages> {
-   decltype(cme_test::messageHeader::templateId) const* operator()(tc::byte_t const* begin, tc::byte_t const* /*end*/) const noexcept {
-	  struct header {
-         std::uint16_t msg_size;
-         cme_test::messageHeader message_header;
-	  };
-      return &reinterpret_cast<header const*>(begin)->message_header.templateId;
-   }
+   using type = tc::proto_type_id<&cme_test::extended_message_header::templateId>;
 };
 
 template<> struct tc::type_id<cme_test::SecurityStatus30> { constexpr std::uint16_t operator()() const noexcept { return 30;} };

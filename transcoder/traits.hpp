@@ -26,6 +26,8 @@ template<typename T> struct type_id{};
 template<typename T>
 using proto_options = decltype(protocol_options(std::declval<T>()));  // tc::options<> protocol_options(...) - has to be declared in protocol namespace
 
+template <auto T> class proto_type_id;
+template <typename T, typename U, U T::* P> struct proto_type_id<P> {};
 
 } }
 

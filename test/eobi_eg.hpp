@@ -135,9 +135,7 @@ BOOST_DESCRIBE_STRUCT(OrderMassDelete, (), (
 
 template <>
 struct tc::type_id<eobi_test::messages> {
-   decltype(eobi_test::MessageHeaderComp::TemplateID) const* operator()(tc::byte_t const* begin, tc::byte_t const* /*end*/) const noexcept {
-      return &reinterpret_cast<eobi_test::MessageHeaderComp const*>(begin)->TemplateID;
-   }
+   using type = tc::proto_type_id<&eobi_test::MessageHeaderComp::TemplateID>;
 };
 
 template<> struct tc::type_id<eobi_test::Heartbeat> { constexpr std::uint16_t operator()() const noexcept { return 13001;} };

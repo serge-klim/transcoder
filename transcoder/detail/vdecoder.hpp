@@ -1,6 +1,7 @@
 #pragma once
 #include "../traits.hpp"
 #include "../error.hpp"
+#include "../flyweight.hpp"
 #include "utils.hpp"
 #include "sint.hpp"
 #include <boost/mp11/algorithm.hpp>
@@ -15,7 +16,21 @@
 
 namespace tc { inline namespace v1 {
 
-template <typename... T, typename Options>
+struct header {
+   char message_type;
+};
+
+BOOST_DESCRIBE_STRUCT(header, (), (message_type))
+
+template <typename ...T>
+struct type_id<std::variant<T...>> {
+   static_assert(std::conjunction_v<std::is_same<decltype(header::message_type), decltype(tc::type_id<T>{}())>...>,
+                 "there is no specialization of tc::type_id<std::variant<T, Ts...>> and decltype(tc::type_id<Ts>{}())>... is different");
+   using type = proto_type_id<&header::message_type>;
+};
+
+
+template <typename ...T, typename Options>
 struct decoder<std::variant<T...>, Options, std::true_type> {
    using type_list = boost::mp11::mp_list<T...>;
    template <typename H>
@@ -37,16 +52,15 @@ struct dispatcher : std::integral_constant<decltype(type_id<T>{}()), type_id<T>{
    using type = T;
 };
 
-template <typename T, typename... Ts>
-auto id_buffer(tc::byte_t const* begin, tc::byte_t const* end) -> decltype(tc::type_id<std::variant<T, Ts...>>{}(begin, end)) {
-   return tc::type_id<std::variant<T, Ts...>>{}(begin, end);
+template <typename T, typename U, U T::* P>
+constexpr std::size_t protocol_header_size(proto_type_id<P> const&) noexcept {
+   return sizeof(T);
 }
 
-template <typename T, typename... Ts>
-constexpr auto id_buffer(tc::byte_t const* begin, void const* /*end*/) noexcept {
-   static_assert(std::conjunction_v<std::is_same<decltype(tc::type_id<T>{}()), decltype(tc::type_id<Ts>{}())>...>, 
-       "there is no specialization of tc::type_id<std::variant<T, Ts...>> and decltype(tc::type_id<Ts>{}())>... is different");
-   return begin;
+template <typename Option, typename T, typename U, U T::* P>
+auto decode_id(proto_type_id<P> const&, byte_t const* begin, byte_t const* end) {
+   auto header = decoder<tc::flyweight<T, Option>, Option>{}(begin, end);
+   return tc::get<P>(header);
 }
 
 } // namespace detail
@@ -60,18 +74,14 @@ void tc::v1::decoder<std::variant<T...>, Options, std::true_type>::operator()(by
        &detail::dispatch_type<T, Options, H>...,
    };
 
-   //auto const* type_id_offset = type_id<std::variant<T...>>{}(begin, end);
-   auto const* type_id_offset = detail::id_buffer<T...>(begin, end);
-   static_assert(std::is_pointer_v<decltype(type_id_offset)>, "type_id<std::variant<T...>> expected to be an offset from begin");
-   if (auto const end_of_type_id = reinterpret_cast<tc::byte_t const*>(type_id_offset) + sizeof(*type_id_offset); end_of_type_id > end) {
-      std::forward<H>(handler)(more_wanted{static_cast<std::size_t>(std::distance(end, end_of_type_id))});
+   using proto_id = typename tc::type_id<std::variant<T...>>::type;
+   auto size = detail::protocol_header_size(proto_id{});
+   if (std::distance(begin, end) < size) {
+      std::forward<H>(handler)(more_wanted{size});
       return;
    }
-
-   auto const type = std::bit_cast<std::decay_t<decltype(*type_id_offset)>>(*type_id_offset);
-   static constexpr decltype(type) ids[] = {
-       type_id<T>{}()...,
-   };
+   auto const type = detail::decode_id<Options>(proto_id{}, begin, end);
+   static constexpr decltype(type) ids[] = {type_id<T>{}()...,};
    static constexpr auto ids_end = ids + std::ssize(ids);
 
    // id_type type;

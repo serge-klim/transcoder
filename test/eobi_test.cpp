@@ -17,16 +17,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(encode_decode_message_test, message, eobi_test::me
     auto data = std::array<tc::byte_t, 1500>{};
     std::iota(begin(data), end(data), 11);
     auto id = tc::type_id<message>{}();
-    std::memcpy(&reinterpret_cast<message*>(data.data())->MessageHeader.TemplateID, &id, sizeof(id));
-
     auto begin = data.data();
+    tc::encode(begin + sizeof(eobi_test::MessageHeaderComp::BodyLen), begin + data.size(), id);
     //auto decoded_variant = tc::decode<nasdaq::itch::v5_0::messages>(begin, begin + data.size());
     auto decoded_variant = tc::decode<eobi_test::messages>(begin, begin + data.size());
 	std::visit([&data](auto const& msg) {
 		if constexpr (!std::is_same_v<decltype(msg), message const&>) {
             BOOST_CHECK_MESSAGE(false, "wrong type has been decoded: " << tc::type_name<decltype(msg)>{}() << " instead of " << tc::type_name<message>{}());
 		}
-        auto out = tc::encode<message>(msg);
+        auto out = tc::encode(msg);
         BOOST_REQUIRE_LE(out.size(), data.size());
         auto begin = data.data();
         BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(out), cend(out), begin, begin + out.size());
@@ -42,17 +41,16 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(encode_decode_as_flyweight_message_test, message, 
    auto data = std::array<tc::byte_t, 1500>{};
    std::iota(begin(data), end(data), 11);
    auto id = tc::type_id<message>{}();
-   std::memcpy(&reinterpret_cast<message*>(data.data())->MessageHeader.TemplateID, &id, sizeof(id));
-
    auto begin = data.data();
+   tc::encode(begin + sizeof(eobi_test::MessageHeaderComp::BodyLen), begin + data.size(), id);
    // auto decoded_variant = tc::decode<nasdaq::itch::v5_0::messages>(begin, begin + data.size());
-   auto decoded_variant = tc::decode < tc::as_flyweight<eobi_test::messages>>(begin, begin + data.size());
+   auto decoded_variant = tc::decode<tc::as_flyweight<eobi_test::messages>>(begin, begin + data.size());
    std::visit([&data](auto const& fw) {
       auto msg = fw.value();
       if constexpr (!std::is_same_v<decltype(msg), message>) {
          BOOST_CHECK_MESSAGE(false, "wrong type has been decoded: " << tc::type_name<decltype(msg)>{}() << " instead of " << tc::type_name<message>{}());
       }
-      auto out = tc::encode<message>(msg);
+      auto out = tc::encode(msg);
       BOOST_REQUIRE_LE(out.size(), data.size());
       auto begin = data.data();
       BOOST_CHECK_EQUAL_COLLECTIONS(cbegin(out), cend(out), begin, begin + out.size());
