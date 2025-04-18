@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(encode_decode_message_test, message, eobi_test::me
     std::iota(begin(data), end(data), 11);
     auto id = tc::type_id<message>{}();
     auto begin = data.data();
-    tc::encode(begin + sizeof(eobi_test::MessageHeaderComp::BodyLen), begin + data.size(), id);
+    tc::encode(begin + sizeof(eobi_test::MessageHeaderComp::bodyLen), begin + data.size(), id);
     //auto decoded_variant = tc::decode<nasdaq::itch::v5_0::messages>(begin, begin + data.size());
     auto decoded_variant = tc::decode<eobi_test::messages>(begin, begin + data.size());
 	std::visit([&data](auto const& msg) {
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(encode_decode_as_flyweight_message_test, message, 
    std::iota(begin(data), end(data), 11);
    auto id = tc::type_id<message>{}();
    auto begin = data.data();
-   tc::encode(begin + sizeof(eobi_test::MessageHeaderComp::BodyLen), begin + data.size(), id);
+   tc::encode(begin + sizeof(eobi_test::MessageHeaderComp::bodyLen), begin + data.size(), id);
    // auto decoded_variant = tc::decode<nasdaq::itch::v5_0::messages>(begin, begin + data.size());
    auto decoded_variant = tc::decode<tc::as_flyweight<eobi_test::messages>>(begin, begin + data.size());
    std::visit([&data](auto const& fw) {
