@@ -15,6 +15,7 @@
 #include <array>
 #include <bit>
 #include <iterator>
+#include <chrono>
 #include <type_traits>
 #include <cassert>
 
@@ -48,6 +49,13 @@ struct decoder<padding<N>, Options, std::true_type> {
       assert(std::distance(begin, end) >= size);
       begin += size;
       return {};
+   }
+};
+
+template <class Rep, class Period, typename Options>
+struct decoder<std::chrono::duration<Rep, Period>, Options, utils::trivially_encodable<Rep>> {
+   std::chrono::duration<Rep, Period> operator()(byte_t const*& begin, [[maybe_unused]] byte_t const* end) noexcept {     
+      return std::chrono::duration<Rep, Period>{decoder<Rep, Options>{}(begin, end)};
    }
 };
 

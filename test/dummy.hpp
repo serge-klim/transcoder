@@ -63,14 +63,14 @@ struct nested_type {
    arrays_type at;
 };
 
-struct name_time {
-   std::string name;
-   std::chrono::system_clock::time_point nasdaq_time;
+struct time {
+   std::chrono::nanoseconds ns;
+   std::chrono::duration<std::uint64_t, std::nano> nasdaq_time;
 };
 
 struct var_size {
    std::string text;
-   std::vector<name_time> vals;
+   std::vector<time> vals;
 };
 
 using messages = std::variant<arrays_type, type1, nested_type>;
@@ -114,9 +114,9 @@ BOOST_DESCRIBE_STRUCT(nested_type, (),
                           lla,
                           at))
 
-BOOST_DESCRIBE_STRUCT(name_time, (),
+BOOST_DESCRIBE_STRUCT(time, (),
                       (
-                          name,
+                          ns,
                           nasdaq_time))
 
 BOOST_DESCRIBE_STRUCT(var_size, (),

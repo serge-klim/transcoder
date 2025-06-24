@@ -100,6 +100,17 @@ BOOST_AUTO_TEST_CASE(dummy_type1_encode_decode_test) {
    BOOST_CHECK_EQUAL(begin, res.data() + res.size());
 }
 
+BOOST_AUTO_TEST_CASE(dummy_chrono_encode_decode_test) {
+   auto in = dummy::time{std::chrono::nanoseconds{111}, std::chrono::duration<std::uint64_t, std::nano>{333}};
+   auto res = tc::encode(in);
+   BOOST_CHECK(!res.empty());
+   BOOST_CHECK_LE(res.size(), sizeof(in));
+   auto begin = res.data();
+   auto out = tc::decode<decltype(in)>(begin, begin + res.size());
+   BOOST_CHECK_EQUAL(in.ns, out.ns);
+   BOOST_CHECK_EQUAL(in.nasdaq_time, out.nasdaq_time);
+}
+
 BOOST_AUTO_TEST_CASE(dummy_type1_encode_decode_as_tuple_test) {
    auto in = dummy::type1{'1', 1, 0xf00002, 3, 4, 5, 6009};
    auto res = tc::encode(in);

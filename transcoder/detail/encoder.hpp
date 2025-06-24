@@ -48,6 +48,14 @@ struct encoder<padding<N>, Options, std::true_type> {
    }
 };
 
+template <class Rep, class Period, typename Options>
+struct encoder<std::chrono::duration<Rep, Period>, Options, utils::trivially_encodable<Rep>> {
+   byte_t* operator()(std::chrono::duration<Rep, Period> const& value, byte_t* begin, [[maybe_unused]] byte_t* end) noexcept {
+      return {encoder<Rep, Options>{}(value.count(), begin, end)};
+   }
+};
+
+
 namespace detail {
 
 template <class T, std::size_t N, typename Options>

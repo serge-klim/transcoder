@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "describe.hpp"
 #include "tuple.hpp"
+#include <chrono>
 #include <type_traits>
 
 namespace tc {	inline namespace v1 {
@@ -29,5 +30,9 @@ template<typename T, typename Options>
 struct encoded_sizeof<T, Options, typename boost::describe::has_describe_members<T>::type>
 	: describe::encoded_structure_sizeof<T, Options> {
 };
+
+template <class Rep, class Period, typename Options>
+struct encoded_sizeof<std::chrono::duration<Rep, Period>, Options, utils::trivially_encodable<Rep>> : std::integral_constant<std::size_t, sizeof(Rep)> {};
+
 
 }} // namespace tc::v1
