@@ -4,6 +4,7 @@
 #include "../flyweight.hpp"
 #include "utils.hpp"
 #include "sint.hpp"
+#include "simd/vector.hpp"
 #include <boost/mp11/algorithm.hpp>
 #include <boost/mp11/list.hpp>
 #include <variant>
@@ -63,7 +64,33 @@ auto decode_id(proto_type_id<P> const&, byte_t const* begin, byte_t const* end) 
    return tc::get<P>(header);
 }
 
+template <typename... T>
+constexpr std::size_t simd_vec_size(T&&... v) noexcept {
+   if (std::is_integral_v<std::common_type_t<T...>>) {
+#ifdef TRANSCODER_SIMD_VEC_SIZE
+#if TRANSCODER_SIMD_VEC_SIZE == 0
+      return 0;
+#else
+      using value_type = std::common_type_t<T...>;
+      auto n = (std::max<std::size_t>)(sizeof...(v) * sizeof(value_type) / sizeof(std::uint8_t), TRANSCODER_SIMD_VEC_SIZE / 8);
+      if (::utils::simd::can_vectorize<sizeof(std::uint8_t)>(n)
+          return n * 8;
+      else
+          return 0;
+
+#endif
+#endif //TRANSCODER_SIMD_VEC_SIZE
+      if (::utils::simd::can_vectorize<std::common_type_t<T...>>(sizeof...(v)))
+         return ::utils::simd::bit_size<std::common_type_t<T...>>(sizeof...(v));
+      else 
+         return 0;
+   } else
+      return 0;
+   //std::unreachable();
+}
+
 } // namespace detail
+
 }} // namespace tc::v1
 
 template <typename... T, typename Options>
@@ -81,51 +108,23 @@ void tc::v1::decoder<std::variant<T...>, Options, std::true_type>::operator()(by
       return;
    }
    auto const type = detail::decode_id<Options>(proto_id{}, begin, end);
-   static constexpr decltype(type) ids[] = {type_id<T>{}()...,};
-   static constexpr auto ids_end = ids + std::ssize(ids);
-
-   // id_type type;
-   // std::memcpy(&type, begin, sizeof(type));
-   if (auto i = std::find(ids, ids_end, type); i != ids_end) {
-      (*dispatchers[std::distance(ids, i)])(begin, end, std::forward<H>(handler));
-      return;
+   if constexpr (constexpr auto vector_bit_size = detail::simd_vec_size(type_id<T>{}()...)) {
+      static auto simd_v = ::utils::simd::make_vector<vector_bit_size>(type_id<T>{}()...);
+      if (auto ix = simd_v.find_first(type); ix < simd_v.size()) {
+         (*dispatchers[ix])(begin, end, std::forward<H>(handler));
+         return;
+      }
+   } else {
+      static constexpr decltype(type) ids[] = {type_id<T>{}()...,};
+      static constexpr auto ids_end = ids + std::ssize(ids);
+      if (auto i = std::find(ids, ids_end, type); i != ids_end) {
+         (*dispatchers[std::distance(ids, i)])(begin, end, std::forward<H>(handler));
+         return;
+      }
    }
    std::forward<H>(handler)(unknown_type{});
-   // static const auto selector = type_selector<T...>{};
-   // typename type_selector<T...>::value_t type;
-   // std::memcpy(&type, begin, sizeof(type));
-   // if (auto ix = selector.find(type); ix < selector.size())
-   //	(*dispatchers[ix])(begin, end, std::forward<H>(handler));
-   // else
-   //	std::forward<H>(handler)(unknown_type{});
 }
 
-// template<typename ...T, typename Options> template<typename H>
-// void tc::v1::decoder<std::variant<T...>, Options, std::true_type>::operator()(byte_t const*& begin, byte_t const* end, H&& handler) {
-//	using diptachers = boost::mp11::mp_sort < boost::mp11::mp_list<detail::dispatcher<T>... >, boost::mp11::mp_less>;
-//	decode(diptachers{}, begin, end, std::forward<H>(handler));
-// }
-//
-// template<typename ...T, typename Options>
-// template<typename H, typename ...D>
-// void tc::v1::decoder<std::variant<T...>, Options, std::true_type>::decode(boost::mp11::mp_list<D...>, byte_t const*& begin, byte_t const* end, H&& handler) {
-//	static_assert(sizeof...(T) == sizeof...(D));
-//	using id_type = typename detail::simplified_integer_type<decltype(type_id<boost::mp11::mp_front<type_list>>{}()) > ::type;
-//	auto size = std::distance(begin, end);
-//	if (size < sizeof(id_type))
-//		std::forward<H>(handler)(more_wanted{ sizeof(id_type) });
-//
-//	using dispatcher = void(*)(byte_t const*&, byte_t const*, H&&);
-//	static constexpr id_type ids[] = { type_id<typename D::type>{}()..., };
-//	static constexpr dispatcher dispatchers[] = { &detail::dispatch_type<typename D::type,Options,H>..., };
-//	static constexpr auto ids_end = ids + std::ssize(ids);
-//	id_type type;
-//	std::memcpy(&type, begin, sizeof(type));
-//	if(auto i = std::lower_bound(ids, ids_end, type); i!=ids_end && *i == type)
-//		(*dispatchers[std::distance(ids,i)])(begin, end, std::forward<H>(handler));
-//	else
-//		std::forward<H>(handler)(unknown_type{});
-// }
 
 template <typename... T, typename Options>
 std::variant<T...> tc::v1::decoder<std::variant<T...>, Options, std::true_type>::operator()(byte_t const*& begin, byte_t const* end) /*noexcept

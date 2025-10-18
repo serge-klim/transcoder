@@ -5,7 +5,7 @@ add_library (transcoder INTERFACE)
 add_library (transcoder::transcoder ALIAS transcoder)
 
 target_sources(transcoder PUBLIC FILE_SET HEADERS
-				FILES
+				FILES				
 				detail/sint.hpp
 				detail/describe.hpp
 				detail/tuple.hpp
@@ -21,7 +21,10 @@ target_sources(transcoder PUBLIC FILE_SET HEADERS
 				detail/utils/utils.hpp
 				detail/tagged_t.hpp
 				detail/tagged_t_17.hpp
-#				detail/type_selector.hpp
+				detail/simd/detail.hpp
+				detail/simd/vector.hpp
+				detail/simd/x64/vector.hpp
+				detail/simd/not_supported/vector.hpp
 				error.hpp
 				traits.hpp
 				basic_types.hpp
